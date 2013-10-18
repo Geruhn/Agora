@@ -1,7 +1,7 @@
 "use strict";
 
 var expect = require('chai').expect;
-var sinon = require('sinon');
+var sinon = require('sinon').sandbox.create();
 var conf = require('../configureForTest');
 var Member = conf.get('beans').get('member');
 
@@ -18,11 +18,14 @@ describe('MembersAPI', function () {
       }
       callback(null, null);
     });
+    sinon.stub(memberstore, 'saveMember', function (member, callback) {
+      callback(null, null);
+    });
     done();
   });
 
   afterEach(function (done) {
-    memberstore.getMember.restore();
+    sinon.restore();
     done();
   });
 
@@ -77,6 +80,14 @@ describe('MembersAPI', function () {
     expect(api.isReserved('a.')).to.be.false;
     expect(api.isReserved('..a')).to.be.false;
     expect(api.isReserved('.a')).to.be.false;
+    done();
+  });
+
+  it('sends eMails for new member', function (done) {
+    var member = {
+      id : 'bullShit'
+    };
+    api.saveMember(member, function () { console.log('Callback called'); });
     done();
   });
 
